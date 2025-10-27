@@ -1,62 +1,40 @@
 # Facebook Group Auto-Comment Tool
 
-Công cụ desktop được xây dựng bằng Python và PyQt6 để tự động quét các nhóm Facebook công khai, tìm kiếm các bài viết có chứa từ khóa liên quan đến sản phẩm và đăng bình luận chứa link sản phẩm tương ứng.
-
-**Tác giả:** Jules (AI Software Engineer)
-**Phiên bản:** 1.2.0 (Hoàn thiện Bộ công cụ Kiểm thử)
+**Phiên bản:** 1.3.0 (Xử lý lỗi Chrome Binary & Hoàn thiện)
 
 ---
 
 ## ⚠️ Cảnh báo Quan trọng
 
-**Việc tự động hóa các hoạt động trên nền tảng Facebook là vi phạm [Điều khoản Dịch vụ](https://www.facebook.com/terms.php) của họ.**
-
--   **Rủi ro:** Sử dụng công cụ này có thể dẫn đến việc tài khoản của bạn bị **hạn chế tạm thời** hoặc **khóa vĩnh viễn**.
--   **Trách nhiệm:** Công cụ này được tạo ra cho mục đích giáo dục. Người phát triển không chịu trách nhiệm về các hậu quả có thể xảy ra.
--   **Khuyến nghị:** Luôn sử dụng trên một **tài khoản Facebook thử nghiệm**.
+Việc tự động hóa có thể vi phạm Điều khoản Dịch vụ của Facebook. **Hãy luôn sử dụng trên tài khoản thử nghiệm.**
 
 ---
 
 ## 🔬 Hướng dẫn Kiểm thử Từng bước (Quan trọng!)
 
-Trước khi chạy ứng dụng chính, bạn **bắt buộc** phải thực hiện các bước kiểm thử sau để đảm bảo mọi chức năng cốt lõi đều hoạt động tốt với phiên bản hiện tại của Facebook.
+Trước khi chạy, hãy thực hiện các bước kiểm thử để đảm bảo mọi thứ hoạt động.
 
-### Bước 0: Chuẩn bị file cấu hình thử nghiệm
+### Bước 0: Chuẩn bị file `config.testing.json`
 
 1.  Mở file `config.testing.json`.
-2.  Điền **email** và **mật khẩu** của tài khoản Facebook **thử nghiệm** của bạn.
-3.  Trong phần `"groups"`, thay thế URL mẫu bằng URL của một **nhóm Facebook công khai** mà bạn muốn dùng để test.
-4.  Trong phần `"test_post_url"`, dán URL đầy đủ của một **bài viết công khai bất kỳ** để thử nghiệm chức năng bình luận.
+2.  Điền **email** và **mật khẩu** của tài khoản Facebook thử nghiệm.
+3.  Cập nhật URL trong `"groups"` và `"test_post_url"`.
+4.  **Nếu gặp lỗi "cannot find Chrome binary"**, hãy xem phần **"Gỡ lỗi"** ở cuối file này để biết cách điền `"chrome_binary_path"`.
 
 ### Bước 1: Kiểm tra Đăng nhập
 
-Xác nhận thông tin đăng nhập và khả năng tương tác cơ bản với trang Facebook.
-
 -   **Chạy lệnh:** `python test_login.py`
--   **Kết quả mong đợi:** Terminal hiển thị **"SUCCESS: Đăng nhập thành công!"**.
--   **Xử lý lỗi:** Kiểm tra lại thông tin đăng nhập hoặc khả năng tài khoản bị yêu cầu xác thực 2 yếu tố.
+-   **Kết quả mong đợi:** Terminal báo **"SUCCESS: Đăng nhập thành công!"**.
 
-### Bước 2: Kiểm tra Quét nhóm, Lấy và Lọc Bài viết
-
-Kiểm tra 2 vấn đề: (1) Tool có tìm được các bài viết không (selector đúng không?) và (2) Logic so khớp từ khóa có hoạt động không?
+### Bước 2: Kiểm tra Quét, Lấy và Lọc Bài viết
 
 -   **Chạy lệnh:** `python test_scan.py`
--   **Kết quả mong đợi:**
-    -   Terminal in ra nội dung các bài viết tìm được.
-    -   Hiển thị dòng **"[MATCH FOUND!]"** nếu bài viết chứa từ khóa.
--   **Xử lý lỗi:** Nếu báo **"WARNING: Không tìm thấy bài viết nào..."**, bạn cần cập nhật `POST_SELECTOR` trong file `test_scan.py`. Xem mục **"Bảo trì và Gỡ lỗi"**.
+-   **Kết quả mong đợi:** Terminal in ra nội dung bài viết và báo **"[MATCH FOUND!]"** nếu có từ khóa khớp.
 
 ### Bước 3: Kiểm tra Hành động Bình luận
 
-Đây là bước cuối cùng, kiểm tra xem tool có tìm thấy ô bình luận và nút gửi hay không.
-
 -   **Chạy lệnh:** `python test_comment.py`
--   **Kết quả mong đợi:**
-    -   Trình duyệt sẽ mở ra, đi thẳng đến bài viết bạn đã chỉ định.
-    -   Terminal sẽ báo cáo từng bước: "Đã tìm thấy ô bình luận", "Đã gõ nội dung", "Đã tìm thấy nút gửi".
-    -   Cuối cùng, hiển thị **"SUCCESS: Tất cả các phần tử để bình luận đều được tìm thấy!"**.
--   **Xử lý lỗi:** Nếu báo lỗi không tìm thấy phần tử, bạn cần cập nhật `COMMENT_BOX_SELECTOR` và `SUBMIT_BUTTON_SELECTOR` trong file `test_comment.py`.
--   **Lưu ý:** Script này mặc định **không gửi bình luận thật**. Nếu muốn thử, bạn phải chỉnh sửa file `test_comment.py` (xóa dấu `#` ở dòng `submit_button.click()`).
+-   **Kết quả mong đợi:** Terminal báo **"SUCCESS: Tất cả các phần tử để bình luận đều được tìm thấy!"**.
 
 ---
 
@@ -66,23 +44,37 @@ Kiểm tra 2 vấn đề: (1) Tool có tìm được các bài viết không (se
 
 1.  **Cấu hình:** Mở file `config.json` và điền thông tin của bạn.
 2.  **Chạy ứng dụng:** `python main.py`
-3.  **Sử dụng Giao diện:**
-    -   **Tab "Cấu hình":** Chỉnh sửa và nhấn **"Lưu Cấu hình"**.
-    -   **Tab "Điều khiển":** **Luôn tick vào "Chế độ Thử nghiệm" trong lần chạy đầu tiên!**
-    -   **Tab "Logs":** Theo dõi hoạt động của tool.
 
 ---
 
-## 🔧 Bảo trì và Gỡ lỗi: Cách cập nhật Selectors
+## 🔧 Gỡ lỗi & Bảo trì
 
-Khi các script test báo lỗi không tìm thấy phần tử (bài viết, ô bình luận), bạn cần cập nhật selector:
+### Xử lý lỗi "cannot find Chrome binary"
 
-1.  Mở trang Facebook trên Chrome.
-2.  Click chuột phải vào phần tử bạn muốn tìm (ví dụ: khu vực một bài viết) và chọn **"Inspect"**.
-3.  Trong cửa sổ DevTools, tìm một thẻ `div` bao trọn phần tử đó.
-4.  Click chuột phải vào thẻ -> **Copy** -> **Copy selector**.
-5.  Mở file script tương ứng (`test_scan.py` hoặc `test_comment.py`) và dán giá trị mới vào biến selector ở đầu file.
-6.  Chạy lại script test để xác nhận.
+Lỗi này xảy ra khi Selenium không tìm thấy file `chrome.exe`. Để khắc phục, bạn cần chỉ đường dẫn thủ công:
 
----
-*Các phần khác của README như Tính năng chính, Hướng dẫn Cài đặt vẫn giữ nguyên như trước.*
+**1. Tìm đường dẫn file `chrome.exe`:**
+
+*   **Windows:**
+    1.  Tìm shortcut Google Chrome trên Desktop hoặc Start Menu.
+    2.  Click chuột phải vào nó -> **Properties** (Thuộc tính).
+    3.  Trong ô **Target** (Mục tiêu), copy toàn bộ đường dẫn (ví dụ: `"C:\Program Files\Google\Chrome\Application\chrome.exe"`).
+*   **macOS:**
+    1.  Mở Finder, vào thư mục **Applications**.
+    2.  Tìm Google Chrome, click chuột phải -> **Get Info**.
+    3.  Tìm giá trị ở mục **Where** và ghép với `/Contents/MacOS/Google Chrome`. Đường dẫn thường là: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`.
+
+**2. Dán đường dẫn vào file cấu hình:**
+
+1.  Mở file `config.testing.json` (khi đang test) hoặc `config.json` (khi chạy thật).
+2.  Tìm đến dòng `"chrome_binary_path": ""`.
+3.  Dán đường dẫn bạn vừa copy vào giữa hai dấu ngoặc kép.
+    -   **Lưu ý quan trọng cho Windows:** Bạn phải **thay đổi tất cả các dấu `\` thành `\\` hoặc `/`**.
+    -   *Ví dụ đúng:* `"chrome_binary_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"`
+    -   *Ví dụ đúng:* `"chrome_binary_path": "C:/Program Files/Google/Chrome/Application/chrome.exe"`
+    -   *Ví dụ sai:* `"chrome_binary_path": "C:\Program Files\Google\Chrome\Application\chrome.exe"`
+4.  Lưu file lại và chạy lại script test.
+
+### Cách cập nhật Selectors
+
+Khi các script test báo lỗi không tìm thấy phần tử (bài viết, ô bình luận), bạn cần cập nhật selector bằng cách dùng công cụ **"Inspect"** của trình duyệt. Hướng dẫn chi tiết có trong các phiên bản trước của README.

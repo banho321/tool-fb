@@ -1,25 +1,6 @@
 # test_login.py
 """
 Script này dùng để kiểm tra riêng lẻ chức năng đăng nhập vào Facebook.
-
-Cách sử dụng:
-1.  Mở file `config.testing.json`.
-2.  Điền email và mật khẩu của tài khoản Facebook DÙNG ĐỂ TEST vào phần "facebook_credentials".
-3.  Chạy script này từ terminal: `python test_login.py`
-
-Script sẽ:
--   Đọc file cấu hình `config.testing.json`.
--   Khởi tạo một trình duyệt Chrome bằng Selenium.
--   Tự động điền thông tin và thử đăng nhập.
--   In ra thông báo thành công hoặc thất bại.
-
-Nếu đăng nhập thành công, bạn sẽ thấy thông báo "SUCCESS: Đăng nhập thành công!"
-và trình duyệt sẽ tự đóng sau 5 giây.
-
-Nếu thất bại, hãy kiểm tra các nguyên nhân sau:
--   Sai email hoặc mật khẩu.
--   Tài khoản bị yêu cầu xác thực 2 yếu tố (2FA) hoặc checkpoint.
--   Giao diện đăng nhập của Facebook đã thay đổi (cần cập nhật ID của các ô input).
 """
 
 import json
@@ -55,6 +36,8 @@ def test_login():
     creds = config.get("facebook_credentials", {})
     email = creds.get("email")
     password = creds.get("password")
+    settings = config.get("settings", {})
+    chrome_binary_path = settings.get("chrome_binary_path", "")
 
     if not email or not password or "YOUR_TEST_EMAIL" in email:
         print("Lỗi: Vui lòng cập nhật email và mật khẩu trong 'config.testing.json' trước khi chạy.")
@@ -64,7 +47,11 @@ def test_login():
     try:
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-notifications")
-        # Kỹ thuật ẩn Selenium
+
+        if chrome_binary_path:
+            options.binary_location = chrome_binary_path
+            print(f"Sử dụng Chrome binary từ: {chrome_binary_path}")
+
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
@@ -76,7 +63,6 @@ def test_login():
         print("1. Đang mở trang Facebook...")
         driver.get("https://www.facebook.com/")
 
-        # Đóng popup cookie nếu có
         try:
             cookie_button = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='cookie-policy-manage-dialog-accept-button'], [aria-label='Accept All']"))
@@ -90,7 +76,6 @@ def test_login():
         print("2. Đang điền thông tin đăng nhập...")
         email_field = driver.find_element(By.ID, "email")
         pass_field = driver.find_element(By.ID, "pass")
-
         email_field.send_keys(email)
         time.sleep(0.5)
         pass_field.send_keys(password)
@@ -100,7 +85,6 @@ def test_login():
         login_button = driver.find_element(By.NAME, "login")
         login_button.click()
 
-        # Chờ trang chính load, kiểm tra bằng sự hiện diện của thanh tìm kiếm hoặc một yếu tố đặc trưng khác
         print("4. Đang chờ xác nhận đăng nhập thành công...")
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='search'], a[aria-label='Home']"))
@@ -110,10 +94,10 @@ def test_login():
 
     except (NoSuchElementException, TimeoutException) as e:
         print(f"\nERROR: Đăng nhập thất bại. Không tìm thấy phần tử cần thiết.")
-        print("Nguyên nhân có thể do Facebook đã thay đổi giao diện. Hãy kiểm tra lại các selector.")
         print(f"Chi tiết lỗi: {e}")
     except Exception as e:
         print(f"\nERROR: Đã xảy ra lỗi không xác định: {e}")
+        print("Mẹo: Nếu lỗi là 'cannot find Chrome binary', hãy thử điền đường dẫn Chrome vào 'chrome_binary_path' trong file config.testing.json.")
     finally:
         if driver:
             print("Trình duyệt sẽ tự đóng sau 5 giây.")
