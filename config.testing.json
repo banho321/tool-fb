@@ -12,17 +12,13 @@
             "name": "Test Product A",
             "keywords": "máy ảnh,camera,chụp hình",
             "link": "https://example.com/camera - Đây là link sản phẩm bạn cần."
-        },
-        {
-            "name": "Test Product B",
-            "keywords": "điện thoại,smartphone",
-            "link": "https://example.com/phone - Sản phẩm này có nhiều ưu đãi."
         }
     ],
     "settings": {
         "headless": false,
         "test_mode": true,
         "max_posts_per_group": 5,
-        "actions_per_hour": 100
+        "actions_per_hour": 100,
+        "chrome_binary_path": ""
     }
 }
