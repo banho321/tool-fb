@@ -1,12 +1,12 @@
 {
     "facebook_credentials": {
-        "email": "YOUR_TEST_EMAIL@example.com",
-        "password": "YOUR_TEST_PASSWORD"
+        "email": "tbae0305@gmail.com",
+        "password": "linh032201"
     },
     "groups": [
-        "https://www.facebook.com/groups/your_public_test_group"
+        "https://www.facebook.com/groups/270937463263502/"
     ],
-    "test_post_url": "https://www.facebook.com/groups/your_group/permalink/your_post_id/",
+    "test_post_url": "https://www.facebook.com/share/p/1BSaD9GYKb/",
     "products": [
         {
             "name": "Test Product A",
