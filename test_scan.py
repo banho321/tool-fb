@@ -1,49 +1,38 @@
 # test_scan.py
 """
-Script này dùng để kiểm tra chức năng quét nhóm, trích xuất dữ liệu,
-VÀ kiểm tra logic so khớp từ khóa.
+Script này kiểm tra chức năng quét nhóm VÀ so khớp từ khóa, sử dụng cookie để đăng nhập.
 """
 import json
 import time
 import random
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import TimeoutException
 
-POST_SELECTOR = "div.x1yztbdb.x1n2onr6.xh8yej3.x1ja2u2z"
+POST_SELECTOR = "div.x1yztbdb.x1n2onr6.xh8yej3.x1ja2u2z" # Selector ví dụ
 
 def load_test_config():
-    """Tải cấu hình từ file config.testing.json."""
-    try:
-        with open("config.testing.json", 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print("Lỗi: Không tìm thấy file 'config.testing.json'.")
-        return None
-    return None
+    with open("config.testing.json", 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-def login(driver, email, password):
-    """Hàm phụ trợ để đăng nhập."""
+def login_with_cookie(driver, cookie_file):
+    with open(cookie_file, 'r') as f:
+        cookies = json.load(f)
     driver.get("https://www.facebook.com/")
-    try:
-        WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='cookie-policy-manage-dialog-accept-button']"))).click()
-    except TimeoutException: pass
-
-    driver.find_element(By.ID, "email").send_keys(email)
-    driver.find_element(By.ID, "pass").send_keys(password)
-    driver.find_element(By.NAME, "login").click()
-
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='search']")))
-    print("Đăng nhập thành công.")
+    time.sleep(2)
+    for cookie in cookies:
+        if 'sameSite' not in cookie: cookie['sameSite'] = 'Lax'
+        driver.add_cookie(cookie)
+    driver.refresh()
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[aria-label='Home']")))
+    print("Đăng nhập bằng cookie thành công.")
     return True
 
 def check_keywords(post_text, products):
-    """Kiểm tra từ khóa."""
     post_text_lower = post_text.lower()
     for product in products:
         keywords = [kw.strip().lower() for kw in product.get("keywords", "").split(",") if kw.strip()]
@@ -54,37 +43,24 @@ def check_keywords(post_text, products):
     return False
 
 def test_scan_and_match():
-    """Hàm chính để kiểm tra quét nhóm và so khớp từ khóa."""
-    print("--- Bắt đầu kiểm tra quét nhóm, trích xuất VÀ so khớp từ khóa ---")
+    print("--- Bắt đầu kiểm tra quét nhóm (đăng nhập bằng cookie) ---")
     config = load_test_config()
-    if not config: return
-
-    creds = config.get("facebook_credentials", {})
+    cookie_file = config["facebook_credentials"]["cookie_file_path"]
     group_urls = config.get("groups", [])
     products = config.get("products", [])
-    chrome_binary_path = config.get("settings", {}).get("chrome_binary_path", "")
-
-    if not group_urls or "your_public_test_group" in group_urls[0]:
-        print("Lỗi: Vui lòng cập nhật group URL trong 'config.testing.json'.")
-        return
+    firefox_binary_path = config.get("settings", {}).get("firefox_binary_path", "")
 
     driver = None
     try:
-        options = webdriver.ChromeOptions()
-        options.add_argument("--disable-notifications")
-        if chrome_binary_path:
-            options.binary_location = chrome_binary_path
-            print(f"Sử dụng Chrome binary từ: {chrome_binary_path}")
+        options = webdriver.FirefoxOptions()
+        if firefox_binary_path:
+            options.binary_location = firefox_binary_path
 
-        options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        service = FirefoxService(GeckoDriverManager().install())
+        driver = webdriver.Firefox(service=service, options=options)
 
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
-
-        print("1. Đang đăng nhập...")
-        login(driver, creds["email"], creds["password"])
-        time.sleep(2)
+        print("1. Đang đăng nhập bằng cookie...")
+        login_with_cookie(driver, cookie_file)
 
         target_group = group_urls[0]
         print(f"2. Đang truy cập nhóm: {target_group}")
@@ -102,19 +78,24 @@ def test_scan_and_match():
         posts = soup.select(POST_SELECTOR)
 
         if not posts:
-            print("\nWARNING: Không tìm thấy bài viết nào với selector hiện tại.")
+            print("\nWARNING: Không tìm thấy bài viết nào.")
             return
 
         print(f"\nSUCCESS: Tìm thấy {len(posts)} bài viết. Bắt đầu phân tích:")
-        # ... (phần còn lại không đổi)
+        for i, post in enumerate(posts):
+            content_selector = "div[data-ad-preview='message'], .x1iorvi4.x1pi30zi.x1l90r2v.x1swvt13"
+            post_text_element = post.select_one(content_selector)
+            post_text = post_text_element.text.strip() if post_text_element else ""
+
+            print(f"BÀI VIẾT #{i+1}: '{post_text[:100]}...'")
+            check_keywords(post_text, products)
 
     except Exception as e:
-        print(f"\nERROR: Đã có lỗi xảy ra trong quá trình quét: {e}")
-        print("Mẹo: Nếu lỗi là 'cannot find Chrome binary', hãy thử điền đường dẫn Chrome vào 'chrome_binary_path' trong file config.testing.json.")
+        print(f"\nERROR: Đã có lỗi xảy ra: {e}")
     finally:
         if driver:
-            print("\n--- Kết thúc kiểm tra ---")
             driver.quit()
+        print("\n--- Kết thúc kiểm tra ---")
 
 if __name__ == "__main__":
     test_scan_and_match()

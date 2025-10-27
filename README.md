@@ -1,80 +1,84 @@
-# Facebook Group Auto-Comment Tool
+# Facebook Group Auto-Comment Tool (Cookie Login Edition)
 
-**Phiên bản:** 1.3.0 (Xử lý lỗi Chrome Binary & Hoàn thiện)
-
----
-
-## ⚠️ Cảnh báo Quan trọng
-
-Việc tự động hóa có thể vi phạm Điều khoản Dịch vụ của Facebook. **Hãy luôn sử dụng trên tài khoản thử nghiệm.**
+**Phiên bản:** 2.0.0
 
 ---
 
-## 🔬 Hướng dẫn Kiểm thử Từng bước (Quan trọng!)
+## ⚠️ Thay đổi Lớn ở Phiên bản 2.0
 
-Trước khi chạy, hãy thực hiện các bước kiểm thử để đảm bảo mọi thứ hoạt động.
+Ứng dụng đã được nâng cấp để sử dụng **phương thức đăng nhập bằng cookie thay vì mật khẩu**. Đây là cách làm **an toàn và ổn định hơn**, giúp giảm thiểu rủi ro tài khoản bị checkpoint. Quy trình cài đặt và sử dụng đã thay đổi, vui lòng đọc kỹ hướng dẫn dưới đây.
 
-### Bước 0: Chuẩn bị file `config.testing.json`
+---
+
+## 🚀 Hướng dẫn Cài đặt và Sử dụng
+
+### Bước 1: Cài đặt Môi trường
+
+1.  **Cài đặt Firefox:** Đảm bảo bạn đã cài đặt trình duyệt Mozilla Firefox.
+2.  **Tải mã nguồn:** Tải và giải nén project.
+3.  **Cài đặt thư viện:** Mở terminal trong thư mục project và chạy:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### Bước 2: Lấy File Cookie từ Trình duyệt
+
+Đây là bước quan trọng nhất.
+
+1.  **Cài đặt Extension "Cookie Editor":**
+    -   Mở Firefox, truy cập trang [Cookie Editor Add-on](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/) và thêm nó vào Firefox.
+
+2.  **Đăng nhập Facebook:**
+    -   Mở một tab mới, truy cập [www.facebook.com](https://www.facebook.com) và đăng nhập vào tài khoản **thử nghiệm** của bạn như bình thường.
+
+3.  **Xuất File Cookie:**
+    -   Sau khi đăng nhập thành công, click vào biểu tượng extension **Cookie Editor** (hình chiếc bánh quy) trên thanh công cụ.
+    -   Chọn nút **"Export"** (thường ở góc dưới bên phải).
+    -   Trong menu xổ ra, chọn **"Export as JSON"**.
+    -   Một file tên là `cookies.json` sẽ được tải về. Hãy di chuyển file này vào cùng thư mục với project code.
+
+### Bước 3: Cấu hình và Kiểm thử
+
+Ứng dụng cung cấp các script để bạn kiểm tra từng chức năng trước khi chạy chính thức.
+
+**a. Chuẩn bị file `config.testing.json`:**
 
 1.  Mở file `config.testing.json`.
-2.  Điền **email** và **mật khẩu** của tài khoản Facebook thử nghiệm.
-3.  Cập nhật URL trong `"groups"` và `"test_post_url"`.
-4.  **Nếu gặp lỗi "cannot find Chrome binary"**, hãy xem phần **"Gỡ lỗi"** ở cuối file này để biết cách điền `"chrome_binary_path"`.
+2.  Trong mục `"cookie_file_path"`, điền tên file cookie bạn vừa tải về (ví dụ: `"cookies.json"`).
+3.  Cập nhật URL trong `"groups"` và `"test_post_url"` để phù hợp với môi trường test của bạn.
 
-### Bước 1: Kiểm tra Đăng nhập
+**b. Chạy các script kiểm thử:**
 
--   **Chạy lệnh:** `python test_login.py`
--   **Kết quả mong đợi:** Terminal báo **"SUCCESS: Đăng nhập thành công!"**.
+1.  **Kiểm tra Đăng nhập:**
+    ```bash
+    python test_login.py
+    ```
+    *   **Mong đợi:** Báo "SUCCESS: Đăng nhập bằng cookie thành công!".
 
-### Bước 2: Kiểm tra Quét, Lấy và Lọc Bài viết
+2.  **Kiểm tra Quét & Lọc:**
+    ```bash
+    python test_scan.py
+    ```
+    *   **Mong đợi:** In ra nội dung bài viết và báo "[MATCH FOUND!]".
 
--   **Chạy lệnh:** `python test_scan.py`
--   **Kết quả mong đợi:** Terminal in ra nội dung bài viết và báo **"[MATCH FOUND!]"** nếu có từ khóa khớp.
+3.  **Kiểm tra Bình luận:**
+    ```bash
+    python test_comment.py
+    ```
+    *   **Mong đợi:** Báo "SUCCESS: Tất cả các phần tử để bình luận đều được tìm thấy!".
 
-### Bước 3: Kiểm tra Hành động Bình luận
+### Bước 4: Chạy Ứng dụng Chính
 
--   **Chạy lệnh:** `python test_comment.py`
--   **Kết quả mong đợi:** Terminal báo **"SUCCESS: Tất cả các phần tử để bình luận đều được tìm thấy!"**.
+Chỉ sau khi cả 3 bước test trên đều thành công:
+
+1.  Mở `main.py` để khởi động giao diện.
+2.  Trong tab **"Cấu hình"**, điền email (chỉ để định danh), và dùng nút **"Chọn File..."** để trỏ đến file `cookies.json` của bạn.
+3.  Lưu cấu hình và bắt đầu chạy.
 
 ---
 
-## ▶️ Hướng dẫn Chạy Ứng dụng Chính
+## 🔧 Gỡ lỗi
 
-**Chỉ sau khi cả 3 bước kiểm thử trên đều thành công**, bạn mới nên chạy ứng dụng chính.
-
-1.  **Cấu hình:** Mở file `config.json` và điền thông tin của bạn.
-2.  **Chạy ứng dụng:** `python main.py`
-
----
-
-## 🔧 Gỡ lỗi & Bảo trì
-
-### Xử lý lỗi "cannot find Chrome binary"
-
-Lỗi này xảy ra khi Selenium không tìm thấy file `chrome.exe`. Để khắc phục, bạn cần chỉ đường dẫn thủ công:
-
-**1. Tìm đường dẫn file `chrome.exe`:**
-
-*   **Windows:**
-    1.  Tìm shortcut Google Chrome trên Desktop hoặc Start Menu.
-    2.  Click chuột phải vào nó -> **Properties** (Thuộc tính).
-    3.  Trong ô **Target** (Mục tiêu), copy toàn bộ đường dẫn (ví dụ: `"C:\Program Files\Google\Chrome\Application\chrome.exe"`).
-*   **macOS:**
-    1.  Mở Finder, vào thư mục **Applications**.
-    2.  Tìm Google Chrome, click chuột phải -> **Get Info**.
-    3.  Tìm giá trị ở mục **Where** và ghép với `/Contents/MacOS/Google Chrome`. Đường dẫn thường là: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`.
-
-**2. Dán đường dẫn vào file cấu hình:**
-
-1.  Mở file `config.testing.json` (khi đang test) hoặc `config.json` (khi chạy thật).
-2.  Tìm đến dòng `"chrome_binary_path": ""`.
-3.  Dán đường dẫn bạn vừa copy vào giữa hai dấu ngoặc kép.
-    -   **Lưu ý quan trọng cho Windows:** Bạn phải **thay đổi tất cả các dấu `\` thành `\\` hoặc `/`**.
-    -   *Ví dụ đúng:* `"chrome_binary_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"`
-    -   *Ví dụ đúng:* `"chrome_binary_path": "C:/Program Files/Google/Chrome/Application/chrome.exe"`
-    -   *Ví dụ sai:* `"chrome_binary_path": "C:\Program Files\Google\Chrome\Application\chrome.exe"`
-4.  Lưu file lại và chạy lại script test.
-
-### Cách cập nhật Selectors
-
-Khi các script test báo lỗi không tìm thấy phần tử (bài viết, ô bình luận), bạn cần cập nhật selector bằng cách dùng công cụ **"Inspect"** của trình duyệt. Hướng dẫn chi tiết có trong các phiên bản trước của README.
+-   **Lỗi "cannot find Firefox binary":** Tương tự như lỗi Chrome trước đây, hãy tìm đường dẫn cài đặt Firefox trên máy bạn và điền vào trường `"firefox_binary_path"` trong file config.
+-   **Đăng nhập cookie thất bại:** File cookie có thể đã hết hạn. Hãy đăng xuất khỏi Facebook, đăng nhập lại thủ công, và xuất lại file cookie mới.
+-   **Không tìm thấy bài viết/ô bình luận:** Selector của Facebook đã thay đổi. Hãy dùng công cụ "Inspect" của Firefox để tìm selector mới và cập nhật ở đầu các file `test_*.py` và `scraper.py`.
