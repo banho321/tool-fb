@@ -1,7 +1,7 @@
 {
     "facebook_credentials": {
         "email": "YOUR_TEST_EMAIL@example.com",
-        "password": "YOUR_TEST_PASSWORD"
+        "cookie_file_path": "path/to/your/facebook_cookies.json"
     },
     "groups": [
         "https://www.facebook.com/groups/your_public_test_group"
@@ -19,6 +19,6 @@
         "test_mode": true,
         "max_posts_per_group": 5,
         "actions_per_hour": 100,
-        "chrome_binary_path": ""
+        "firefox_binary_path": ""
     }
 }
