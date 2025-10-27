@@ -1,17 +1,12 @@
 {
     "facebook_credentials": {
-<<<<<<< HEAD
-        "email": "tbae0305@gmail.com",
-        "password": "linh032201"
-=======
         "email": "YOUR_TEST_EMAIL@example.com",
         "cookie_file_path": "path/to/your/facebook_cookies.json"
->>>>>>> 856d4e7c8ab2a65c3a692057cc6dbe29fca751c9
     },
     "groups": [
-        "https://www.facebook.com/groups/270937463263502/"
+        "https://www.facebook.com/groups/your_public_test_group"
     ],
-    "test_post_url": "https://www.facebook.com/share/p/1BSaD9GYKb/",
+    "test_post_url": "https://www.facebook.com/groups/your_group/permalink/your_post_id/",
     "products": [
         {
             "name": "Test Product A",
