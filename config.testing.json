@@ -1,0 +1,28 @@
+{
+    "facebook_credentials": {
+        "email": "YOUR_TEST_EMAIL@example.com",
+        "password": "YOUR_TEST_PASSWORD"
+    },
+    "groups": [
+        "https://www.facebook.com/groups/your_public_test_group"
+    ],
+    "test_post_url": "https://www.facebook.com/groups/your_group/permalink/your_post_id/",
+    "products": [
+        {
+            "name": "Test Product A",
+            "keywords": "máy ảnh,camera,chụp hình",
+            "link": "https://example.com/camera - Đây là link sản phẩm bạn cần."
+        },
+        {
+            "name": "Test Product B",
+            "keywords": "điện thoại,smartphone",
+            "link": "https://example.com/phone - Sản phẩm này có nhiều ưu đãi."
+        }
+    ],
+    "settings": {
+        "headless": false,
+        "test_mode": true,
+        "max_posts_per_group": 5,
+        "actions_per_hour": 100
+    }
+}
